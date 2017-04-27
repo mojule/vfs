@@ -2,7 +2,9 @@
 
 const fs = require( 'fs' )
 const path = require( 'path' )
+const Mime = require( 'mime' )
 const pify = require( 'pify' )
+const isText = require( '../is-text' )
 
 const { stat, readdir, readFile } = pify( fs )
 
@@ -27,18 +29,24 @@ const virtualize = node => {
   }
 
   const createNode = source => {
+    const mime = Mime.lookup( source )
     const parsed = path.parse( source )
     const { base } = parsed
 
+    let encoding
+
+    if( isText( mime ) )
+      encoding = 'utf8'
+
     const createFile = data => {
-      const file = node.createFile( base, data )
+      const file = node.createFile( base, data, encoding )
 
       file.setMeta( 'source', source )
 
       return file
     }
 
-    return readFile( source ).then( createFile )
+    return readFile( source, encoding ).then( createFile )
   }
 
   const pathToNode = source =>

@@ -2,7 +2,9 @@
 
 var fs = require('fs');
 var path = require('path');
+var Mime = require('mime');
 var pify = require('pify');
+var isText = require('../is-text');
 
 var _pify = pify(fs),
     stat = _pify.stat,
@@ -37,19 +39,24 @@ var virtualize = function virtualize(node) {
   };
 
   var createNode = function createNode(source) {
+    var mime = Mime.lookup(source);
     var parsed = path.parse(source);
     var base = parsed.base;
 
 
+    var encoding = void 0;
+
+    if (isText(mime)) encoding = 'utf8';
+
     var createFile = function createFile(data) {
-      var file = node.createFile(base, data);
+      var file = node.createFile(base, data, encoding);
 
       file.setMeta('source', source);
 
       return file;
     };
 
-    return readFile(source).then(createFile);
+    return readFile(source, encoding).then(createFile);
   };
 
   var pathToNode = function pathToNode(source) {

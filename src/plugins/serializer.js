@@ -1,6 +1,8 @@
 'use strict'
 
 const is = require( '@mojule/is' )
+const Mime = require( 'mime' )
+const isText = require( '../is-text' )
 
 const serializer = node => {
   return {
@@ -8,12 +10,19 @@ const serializer = node => {
       const serialized = {}
 
       node.walk( current => {
-        if( current.nodeType() !== 'file' ) return
+        if( current.hasChildren() ) return
 
         const key = current.getPath()
-        const data = current.getValue( 'data' )
 
-        serialized[ key ] = data.toString( 'base64' )
+        let value = true
+
+        if( current.nodeType() === 'file' ){
+          const mime = Mime.lookup( key )
+          const data = current.getValue( 'data' )
+          value = isText( mime ) ? data : data.toString( 'base64' )
+        }
+
+        serialized[ key ] = value
       })
 
       return serialized
@@ -28,9 +37,22 @@ const serializer = node => {
       paths.forEach( filename => {
         const segs = filename.split( '/' )
         const name = segs.pop()
-        const buffer = obj[ filename ]
-        const data = Buffer.from( buffer, 'base64' )
-        const file = node.createFile( name, data )
+        const value = obj[ filename ]
+
+        let file
+
+        if( value === true ){
+          file = node.createDirectory( name )
+        } else {
+          const mime = Mime.lookup( filename )
+          const data = isText( mime ) ? value : Buffer.from( value, 'base64' )
+          let encoding
+
+          if( isText( mime ) )
+            encoding = 'utf8'
+
+          file = node.createFile( name, data, encoding )
+        }
 
         let parent
         let path = ''

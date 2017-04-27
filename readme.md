@@ -2,8 +2,6 @@
 
 Virtual file system built on mojule tree
 
-v0.0.1 - npm/tests/coverage/docs still to come
-
 ## Install
 
 `npm install @mojule/vfs`

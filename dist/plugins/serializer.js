@@ -1,6 +1,8 @@
 'use strict';
 
 var is = require('@mojule/is');
+var Mime = require('mime');
+var isText = require('../is-text');
 
 var serializer = function serializer(node) {
   return {
@@ -8,12 +10,19 @@ var serializer = function serializer(node) {
       var serialized = {};
 
       node.walk(function (current) {
-        if (current.nodeType() !== 'file') return;
+        if (current.hasChildren()) return;
 
         var key = current.getPath();
-        var data = current.getValue('data');
 
-        serialized[key] = data.toString('base64');
+        var value = true;
+
+        if (current.nodeType() === 'file') {
+          var mime = Mime.lookup(key);
+          var data = current.getValue('data');
+          value = isText(mime) ? data : data.toString('base64');
+        }
+
+        serialized[key] = value;
       });
 
       return serialized;
@@ -28,9 +37,21 @@ var serializer = function serializer(node) {
       paths.forEach(function (filename) {
         var segs = filename.split('/');
         var name = segs.pop();
-        var buffer = obj[filename];
-        var data = Buffer.from(buffer, 'base64');
-        var file = node.createFile(name, data);
+        var value = obj[filename];
+
+        var file = void 0;
+
+        if (value === true) {
+          file = node.createDirectory(name);
+        } else {
+          var mime = Mime.lookup(filename);
+          var data = isText(mime) ? value : Buffer.from(value, 'base64');
+          var encoding = void 0;
+
+          if (isText(mime)) encoding = 'utf8';
+
+          file = node.createFile(name, data, encoding);
+        }
 
         var parent = void 0;
         var path = '';
