@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var Mime = require('mime');
 var pify = require('pify');
-var isText = require('../is-text');
+var is = require('../is');
 
 var _pify = pify(fs),
     stat = _pify.stat,
@@ -46,7 +46,7 @@ var virtualize = function virtualize(node) {
 
     var encoding = void 0;
 
-    if (isText(mime)) encoding = 'utf8';
+    if (is.text(mime)) encoding = 'utf8';
 
     var createFile = function createFile(data) {
       var file = node.createFile(base, data, encoding);

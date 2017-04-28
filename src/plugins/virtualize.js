@@ -4,7 +4,7 @@ const fs = require( 'fs' )
 const path = require( 'path' )
 const Mime = require( 'mime' )
 const pify = require( 'pify' )
-const isText = require( '../is-text' )
+const is = require( '../is' )
 
 const { stat, readdir, readFile } = pify( fs )
 
@@ -35,7 +35,7 @@ const virtualize = node => {
 
     let encoding
 
-    if( isText( mime ) )
+    if( is.text( mime ) )
       encoding = 'utf8'
 
     const createFile = data => {
