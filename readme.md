@@ -21,3 +21,7 @@ const virtualDirectory = Vfs.createDirectory( 'text' )
 virtualDirectory.append( virtualFile )
 virtualDirectory.actualize( 'some/path' )
 ```
+
+## Plugins
+
+vfs has the same API as 

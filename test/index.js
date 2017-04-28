@@ -224,6 +224,18 @@ describe( 'VFS', () => {
 
   describe( 'virtualize', () => {
     it( 'virtualizes directory', done => {
+      // git doesn't check in empty folders, we might need to make it
+      const empty = path.join( sourceDirectory, 'depth-0/depth-1/depth-2' )
+
+      try {
+        const stats = fs.statSync( empty )
+      } catch( e ){
+        if( e.code === 'ENOENT' )
+          fs.mkdirSync( empty )
+        else
+          throw e
+      }
+
       Vfs.virtualize( sourceDirectory, ( err, tree ) => {
         assert( !err )
 
