@@ -8,9 +8,10 @@ const isValue = require( './isValue' )
 const nodeType = require( './nodeType' )
 const serializer = require( './serializer' )
 const slug = require( './slug' )
+const value = require( './value' )
 const virtualize = require( './virtualize' )
 
 module.exports = [
   actualize, create, getPath, isEmpty, isValue, nodeType, serializer, slug,
-  virtualize
+  value, virtualize
 ]

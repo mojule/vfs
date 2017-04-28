@@ -303,6 +303,30 @@ describe( 'VFS', () => {
     })
   })
 
+  describe( 'value', () => {
+    it( 'sets new file name value', () => {
+      const text = Vfs.createFile( 'hello.txt', 'hello' )
+
+      text.setValue( 'name', 'goodbye.txt' )
+
+      assert.equal( text.getValue( 'name' ), 'goodbye.txt' )
+    })
+
+    it( 'sets new directory name value', () => {
+      const directory = Vfs.createDirectory( 'hello' )
+
+      directory.setValue( 'name', 'goodbye' )
+
+      assert.equal( directory.getValue( 'name' ), 'goodbye' )
+    })
+
+    it( 'throws on bad value', () => {
+      const text = Vfs.createFile( 'hello.txt', 'hello' )
+
+      assert.throws( () => text.setValue( 'nodeType', 'directory' ) )
+    })
+  })
+
   describe( 'Factory', () => {
     const { Factory } = Vfs
 
