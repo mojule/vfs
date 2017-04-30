@@ -88,11 +88,29 @@ hello.actualize( './temp', err => {
 })
 ```
 
+### atPath
+
+Gets the node at a given path in the tree. Overrides the base atPath to match
+paths that match those provided by `getPath`, see below for more information
+
+```javascript
+const hello = Vds.createDirectory( 'hello' )
+const world = Vfs.createFile( 'world.txt', 'world' )
+
+hello.append( world )
+
+const target = hello.atPath( 'hello/world.txt' )
+
+// true
+console.log( world === target )
+```
+
 ### getPath
 
 Overrides the base getPath to return paths that map 1:1 to a file system - eg
 the slug for the root node will be included in the path, unlike the default
-implementation in which it is instead implied
+implementation in which it is instead implied. Unlike the base getPath, does
+not take a separator - posix style paths eg `/` are used.
 
 ```javascript
 const hello = Vds.createDirectory( 'hello' )
