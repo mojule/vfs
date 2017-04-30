@@ -1,6 +1,7 @@
 'use strict'
 
 const actualize = require( './actualize' )
+const atPath = require( './atPath' )
 const create = require( './create' )
 const getPath = require( './getPath' )
 const isEmpty = require( './isEmpty' )
@@ -12,6 +13,6 @@ const value = require( './value' )
 const virtualize = require( './virtualize' )
 
 module.exports = [
-  actualize, create, getPath, isEmpty, isValue, nodeType, serializer, slug,
-  value, virtualize
+  actualize, atPath, create, getPath, isEmpty, isValue, nodeType, serializer,
+  slug, value, virtualize
 ]

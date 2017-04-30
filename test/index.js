@@ -339,6 +339,44 @@ describe( 'VFS', () => {
     })
   })
 
+  describe( 'paths', () => {
+    it( 'getPath', done => {
+      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
+        const depth2 = tree.find( current =>
+          current.getValue( 'name' ) === 'depth-2'
+        )
+
+        const png = tree.find( current =>
+          current.getValue( 'name' ) === 'bin.png'
+        )
+
+        assert.equal( tree.getPath(), 'source' )
+        assert.equal( depth2.getPath(), 'source/depth-0/depth-1/depth-2' )
+        assert.equal( png.getPath(), 'source/depth-0/depth-1/bin.png' )
+
+        done()
+      })
+    })
+
+    it( 'atPath', done => {
+      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
+        const depth2 = tree.find( current =>
+          current.getValue( 'name' ) === 'depth-2'
+        )
+
+        const png = tree.find( current =>
+          current.getValue( 'name' ) === 'bin.png'
+        )
+
+        assert.equal( tree.atPath( 'source' ), tree )
+        assert.equal( tree.atPath( 'source/depth-0/depth-1/depth-2' ), depth2 )
+        assert.equal( tree.atPath( 'source/depth-0/depth-1/bin.png' ), png )
+
+        done()
+      })
+    })
+  })
+
   describe( 'Factory', () => {
     const { Factory } = Vfs
 
