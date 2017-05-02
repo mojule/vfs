@@ -6,9 +6,9 @@ const Mime = require( 'mime' )
 
 const create = node => {
   return {
-    $createFile: ( name, data, encoding ) => {
-      if( !is.filename( name ) )
-        throw new Error( 'Expected name to be a valid filename' )
+    $createFile: ( filename, data, encoding ) => {
+      if( !is.filename( filename ) )
+        throw new Error( 'Expected filename to be a valid file name' )
 
       if( is.undefined( encoding ) && is.bufferArg( data ) )
         data = Buffer.from( data )
@@ -17,19 +17,19 @@ const create = node => {
         encoding = 'utf8'
 
       const nodeType = 'file'
-      const parsed = path.parse( name )
+      const parsed = path.parse( filename )
       const { ext } = parsed
-      const mime = Mime.lookup( name )
-      const value = { nodeType, name, data, encoding, ext, mime }
+      const mime = Mime.lookup( filename )
+      const value = { nodeType, filename, data, encoding, ext, mime }
 
       return node( node.createState( value ) )
     },
-    $createDirectory: name => {
-      if( !is.filename( name ) )
-        throw new Error( 'Expected name to be a valid filename' )
+    $createDirectory: filename => {
+      if( !is.filename( filename ) )
+        throw new Error( 'Expected filename to be a valid file name' )
 
       const nodeType = 'directory'
-      const value = { nodeType, name }
+      const value = { nodeType, filename }
 
       return node( node.createState( value ) )
     }

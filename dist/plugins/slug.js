@@ -3,7 +3,7 @@
 var slug = function slug(node) {
   return {
     slug: function slug() {
-      return node.getValue('name');
+      return node.filename();
     }
   };
 };

@@ -24,16 +24,16 @@ describe( 'VFS', () => {
       const text = Vfs.createFile( 'hello.txt', 'Hello, world!' )
 
       assert.equal( text.nodeType(), 'file' )
-      assert.equal( text.getValue( 'data' ), 'Hello, world!' )
-      assert.equal( text.getValue( 'mime' ), 'text/plain' )
-      assert.equal( text.getValue( 'name' ), 'hello.txt' )
-      assert.equal( text.getValue( 'ext' ), '.txt' )
+      assert.equal( text.data(), 'Hello, world!' )
+      assert.equal( text.mime(), 'text/plain' )
+      assert.equal( text.filename(), 'hello.txt' )
+      assert.equal( text.ext(), '.txt' )
     })
 
     it( 'from buffer', () => {
       const buffer = Buffer.from( base64png, 'base64' )
       const png = Vfs.createFile( 'bin.png', buffer )
-      const data = png.getValue( 'data' )
+      const data = png.data()
 
       assert( data instanceof Buffer )
     })
@@ -43,7 +43,7 @@ describe( 'VFS', () => {
       const json = JSON.stringify( buffer )
       const obj = JSON.parse( json )
       const png = Vfs.createFile( 'bin.png', obj )
-      const data = png.getValue( 'data' )
+      const data = png.data()
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -54,7 +54,7 @@ describe( 'VFS', () => {
       const json = JSON.stringify( buffer )
       const obj = JSON.parse( json )
       const png = Vfs.createFile( 'bin.png', obj.data )
-      const data = png.getValue( 'data' )
+      const data = png.data()
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -63,7 +63,7 @@ describe( 'VFS', () => {
     it( 'from buffer with encoding', () => {
       const buffer = Buffer.from( base64png, 'base64' )
       const png = Vfs.createFile( 'bin.png', buffer, 'buffer' )
-      const data = png.getValue( 'data' )
+      const data = png.data()
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -74,7 +74,7 @@ describe( 'VFS', () => {
       const hex = buffer.toString( 'hex' )
 
       const png = Vfs.createFile( 'bin.png', hex, 'hex' )
-      const data = png.getValue( 'data' )
+      const data = png.data()
 
       assert( is.string( data ) )
       assert.equal( data, hex )
@@ -140,7 +140,7 @@ describe( 'VFS', () => {
       const serRoot = root.serialize()
       const rootTree = Vfs.deserialize( serRoot )
 
-      const expect = [{ nodeType: 'directory', name: 'root' }]
+      const expect = [{ nodeType: 'directory', filename: 'root' }]
 
       assert.deepEqual( rootTree.get(), expect )
     })
@@ -153,7 +153,7 @@ describe( 'VFS', () => {
       const expect = [
         {
           nodeType: 'file',
-          name: 'hello.txt',
+          filename: 'hello.txt',
           data: 'Hello, World!',
           encoding: 'utf8',
           ext: '.txt',
@@ -180,11 +180,11 @@ describe( 'VFS', () => {
       const tree = Vfs.deserialize( serTree )
 
       const expect = [
-        { nodeType: 'directory', name: 'root' },
+        { nodeType: 'directory', filename: 'root' },
         [
           {
             nodeType: 'file',
-            name: 'hello.txt',
+            filename: 'hello.txt',
             data: 'Hello, World!',
             encoding: 'utf8',
             ext: '.txt',
@@ -192,11 +192,11 @@ describe( 'VFS', () => {
           }
         ],
         [
-          { nodeType: 'directory', name: 'sub' },
+          { nodeType: 'directory', filename: 'sub' },
           [
             {
               nodeType: 'file',
-              name: 'hello.js',
+              filename: 'hello.js',
               data: '\'use strict\'\n',
               encoding: 'utf8',
               ext: '.js',
@@ -205,7 +205,7 @@ describe( 'VFS', () => {
           ]
         ],
         [
-          { nodeType: 'directory', name: 'sub2' }
+          { nodeType: 'directory', filename: 'sub2' }
         ]
       ]
 
@@ -216,7 +216,7 @@ describe( 'VFS', () => {
       const serFile = { 'bin.png': base64png }
 
       const file = Vfs.deserialize( serFile )
-      const data = file.getValue( 'data' )
+      const data = file.data()
 
       assert( data instanceof Buffer )
     })
@@ -319,17 +319,17 @@ describe( 'VFS', () => {
     it( 'sets new file name value', () => {
       const text = Vfs.createFile( 'hello.txt', 'hello' )
 
-      text.setValue( 'name', 'goodbye.txt' )
+      text.setValue( 'filename', 'goodbye.txt' )
 
-      assert.equal( text.getValue( 'name' ), 'goodbye.txt' )
+      assert.equal( text.filename(), 'goodbye.txt' )
     })
 
     it( 'sets new directory name value', () => {
       const directory = Vfs.createDirectory( 'hello' )
 
-      directory.setValue( 'name', 'goodbye' )
+      directory.setValue( 'filename', 'goodbye' )
 
-      assert.equal( directory.getValue( 'name' ), 'goodbye' )
+      assert.equal( directory.filename(), 'goodbye' )
     })
 
     it( 'throws on bad value', () => {
@@ -343,11 +343,11 @@ describe( 'VFS', () => {
     it( 'getPath', done => {
       Vfs.virtualize( sourceDirectory, ( err, tree ) => {
         const depth2 = tree.find( current =>
-          current.getValue( 'name' ) === 'depth-2'
+          current.filename() === 'depth-2'
         )
 
         const png = tree.find( current =>
-          current.getValue( 'name' ) === 'bin.png'
+          current.filename() === 'bin.png'
         )
 
         assert.equal( tree.getPath(), 'source' )
@@ -361,11 +361,11 @@ describe( 'VFS', () => {
     it( 'atPath', done => {
       Vfs.virtualize( sourceDirectory, ( err, tree ) => {
         const depth2 = tree.find( current =>
-          current.getValue( 'name' ) === 'depth-2'
+          current.filename() === 'depth-2'
         )
 
         const png = tree.find( current =>
-          current.getValue( 'name' ) === 'bin.png'
+          current.filename() === 'bin.png'
         )
 
         assert.equal( tree.atPath( 'source' ), tree )
@@ -392,7 +392,7 @@ describe( 'VFS', () => {
       const nameWithoutExt = node => {
         return {
           nameWithoutExt: () => {
-            const name = node.getValue( 'name' )
+            const name = node.filename()
             const parsed = path.parse( name )
 
             return parsed.name

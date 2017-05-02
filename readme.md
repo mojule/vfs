@@ -32,7 +32,7 @@ the following plugins:
 Creates a file node. The arguments are the same as
 [fs.writeFile](https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback):
 
-`Vfs.createFile( name, data, encoding )`
+`Vfs.createFile( filename, data, encoding )`
 
 `encoding` is optional, but if included should be a
 [valid node.js encoding type](http://stackoverflow.com/questions/14551608/list-of-encodings-that-node-js-supports)
@@ -56,7 +56,7 @@ const data3 = Vfs.createFile( 'hello.bin', jsonObj )
 
 Creates a directory node
 
-`Vfs.createDirectory( name )`
+`Vfs.createDirectory( filename )`
 
 ```javascript
 const hello = Vds.createDirectory( 'hello' )
@@ -144,7 +144,7 @@ console.log( world.isEmpty() )
 
 Overrides the default implementation, which simply returns `true` if the node's
 `value` is an object, and only returns true if the combination of `nodeType`,
-`name`, `data`, `encoding` etc. are all correct. Constructing nodes with
+`filename`, `data`, `encoding` etc. are all correct. Constructing nodes with
 `Vfs.createFile` and `Vfs.createDirectory` is suggested to help ensure that this
 is the case. Used internally to throw whenever you attempt to set the value or
 any of its properties to something invalid.
@@ -152,7 +152,7 @@ any of its properties to something invalid.
 ```javascript
 const nodeValue1 = {
   nodeType: 'file',
-  name: 'hello.txt',
+  filename: 'hello.txt',
   data: 'hello'
 }
 
@@ -161,7 +161,7 @@ console.log( Vfs.isValue( nodeValue1 ) )
 
 const nodeValue2 = {
   nodeType: 'file',
-  name: 'temp/hello.txt',
+  filename: 'temp/hello.txt',
   data: 'hello'
 }
 

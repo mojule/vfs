@@ -43,7 +43,7 @@ var isBufferArg = function isBufferArg(subject) {
 };
 
 var isValue = function isValue(subject) {
-  return Is.object(subject) && isValidFilename(subject.name) && Is.string(subject.nodeType);
+  return Is.object(subject) && isValidFilename(subject.filename) && Is.string(subject.nodeType);
 };
 
 var isDirectoryValue = function isDirectoryValue(subject) {

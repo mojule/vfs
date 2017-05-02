@@ -39,7 +39,7 @@ const isBufferArg = subject =>
   isBuffer( subject ) || isJsonBuffer( subject ) || isByteArray( subject )
 
 const isValue = subject =>
-  Is.object( subject ) && isValidFilename( subject.name ) &&
+  Is.object( subject ) && isValidFilename( subject.filename ) &&
   Is.string( subject.nodeType )
 
 const isDirectoryValue = subject =>

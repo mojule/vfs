@@ -2,7 +2,7 @@
 
 const slug = node => {
   return {
-    slug: () => node.getValue( 'name' )
+    slug: () => node.filename()
   }
 }
 
