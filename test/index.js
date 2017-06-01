@@ -236,6 +236,7 @@ describe( 'VFS', () => {
           throw e
       }
 
+      Vfs.registerText( '.mmon' )
       Vfs.virtualize( sourceDirectory, ( err, tree ) => {
         assert( !err )
 
@@ -244,6 +245,7 @@ describe( 'VFS', () => {
         assert.deepEqual( ser, {
           'source/depth-0/depth-1/depth-2': true,
           'source/depth-0/depth-1/bin.png': base64png,
+          'source/depth-0/depth-1/hello.mmon': 'hello>',
           'source/depth-0/hello.js': '\'use strict\'\n',
           'source/hello.txt': 'Hello, World!'
         })
@@ -264,6 +266,16 @@ describe( 'VFS', () => {
 
         done()
       })
+    })
+
+    it( 'bad registerText extensions', () => {
+      assert.throws( () => Vfs.registerText() )
+      assert.throws( () => Vfs.registerText( '' ) )
+    })
+
+    it( 'registerText dotless', () => {
+      Vfs.registerText( 'haml' )
+      assert( Vfs.isTextExtension( '.haml' ) )
     })
   })
 

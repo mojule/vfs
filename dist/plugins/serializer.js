@@ -1,6 +1,7 @@
 'use strict';
 
 var is = require('../is');
+var path = require('path');
 var Mime = require('mime');
 
 var serializer = function serializer(node) {
@@ -17,14 +18,18 @@ var serializer = function serializer(node) {
 
         if (current.nodeType() === 'file') {
           var nodeValue = current.getValue();
-          var encoding = nodeValue.encoding;
+          var encoding = nodeValue.encoding,
+              filename = nodeValue.filename;
           var data = nodeValue.data;
 
           var mime = Mime.lookup(key);
 
+          var _path$parse = path.parse(filename),
+              ext = _path$parse.ext;
+
           if (encoding === 'hex') data = Buffer.from(data, 'hex');
 
-          value = is.text(mime) || is.text(encoding) ? data : data.toString('base64');
+          value = is.text(mime) || is.text(encoding) || node.isTextExtension(ext) ? data : data.toString('base64');
         }
 
         serialized[key] = value;

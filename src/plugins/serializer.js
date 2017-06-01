@@ -1,6 +1,7 @@
 'use strict'
 
 const is = require( '../is' )
+const path = require( 'path' )
 const Mime = require( 'mime' )
 
 const serializer = node => {
@@ -17,14 +18,16 @@ const serializer = node => {
 
         if( current.nodeType() === 'file' ){
           const nodeValue = current.getValue()
-          const { encoding } = nodeValue
+          const { encoding, filename } = nodeValue
           let { data } = nodeValue
           const mime = Mime.lookup( key )
+          const { ext } = path.parse( filename )
 
           if( encoding === 'hex' )
             data = Buffer.from( data, 'hex' )
 
-          value = is.text( mime ) || is.text( encoding ) ? data : data.toString( 'base64' )
+          value = is.text( mime ) || is.text( encoding ) || node.isTextExtension( ext ) ?
+            data : data.toString( 'base64' )
         }
 
         serialized[ key ] = value

@@ -31,11 +31,11 @@ const virtualize = node => {
   const createNode = source => {
     const mime = Mime.lookup( source )
     const parsed = path.parse( source )
-    const { base } = parsed
+    const { base, ext } = parsed
 
     let encoding
 
-    if( is.text( mime ) )
+    if( is.text( mime ) || node.isTextExtension( ext ) )
       encoding = 'utf8'
 
     const createFile = data => {

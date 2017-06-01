@@ -41,12 +41,13 @@ var virtualize = function virtualize(node) {
   var createNode = function createNode(source) {
     var mime = Mime.lookup(source);
     var parsed = path.parse(source);
-    var base = parsed.base;
+    var base = parsed.base,
+        ext = parsed.ext;
 
 
     var encoding = void 0;
 
-    if (is.text(mime)) encoding = 'utf8';
+    if (is.text(mime) || node.isTextExtension(ext)) encoding = 'utf8';
 
     var createFile = function createFile(data) {
       var file = node.createFile(base, data, encoding);
