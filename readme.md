@@ -256,3 +256,15 @@ Vfs.virtualize( 'some/path', ( err, tree ) => {
   console.log( tree.serialize() )
 })
 ```
+
+### registerText
+
+Registers a text extension with vfs - files with this extension will be treated
+as text when encoding is not specified and no matching mime type can be found
+
+```javascript
+Vfs.registerText( '.mmon' )
+
+// true
+console.log( Vfs.isTextExtension( '.mmon' ) )
+```
