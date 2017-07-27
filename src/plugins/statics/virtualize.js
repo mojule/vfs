@@ -4,7 +4,7 @@ const fs = require( 'fs' )
 const path = require( 'path' )
 const Mime = require( 'mime' )
 const pify = require( 'pify' )
-const is = require( '../is' )
+const is = require( '../../is' )
 
 const { stat, readdir, readFile } = pify( fs )
 
@@ -16,14 +16,14 @@ const getChildPaths = current => {
   return stat( current ).then( ls ).then( toPaths )
 }
 
-const virtualize = node => {
+const virtualize = ({ statics, Api }) => {
   const createDirectory = source => {
     const parsed = path.parse( source )
     const { base } = parsed
 
-    const directory = node.createDirectory( base )
+    const directory = Api.createDirectory( base )
 
-    directory.setMeta( 'source', source )
+    directory.meta.source = source
 
     return directory
   }
@@ -35,13 +35,13 @@ const virtualize = node => {
 
     let encoding
 
-    if( is.text( mime ) || node.isTextExtension( ext ) )
+    if( is.text( mime ) || Api.isTextExtension( ext ) )
       encoding = 'utf8'
 
     const createFile = data => {
-      const file = node.createFile( base, data, encoding )
+      const file = Api.createFile( base, data, encoding )
 
-      file.setMeta( 'source', source )
+      file.meta.source = source
 
       return file
     }
@@ -62,23 +62,23 @@ const virtualize = node => {
   const createRoot = rootPath => new Promise( ( resolve, reject ) => {
     const parsed = path.parse( rootPath )
     const { name } = parsed
-    const root = node.createDirectory( name )
+    const root = Api.createDirectory( name )
     const nodes = [ root ]
 
-    root.setMeta( 'source', rootPath )
+    root.meta.source = rootPath
 
     const next = () => {
       if( !nodes.length )
         return resolve( root )
 
       const current = nodes.pop()
-      const source = current.getMeta( 'source' )
+      const { source } = current.meta
 
       getChildPaths( source )
       .then( childPathsToNodes )
       .then( children => {
         children.forEach( child => {
-          current.append( child )
+          current.appendChild( child )
           nodes.push( child )
         })
 
@@ -90,7 +90,7 @@ const virtualize = node => {
     next()
   })
 
-  const $virtualize = ( rootPath, callback ) =>
+  statics.virtualize = ( rootPath, callback ) =>
     stat( rootPath )
     .then( stats =>
       stats.isDirectory() ?
@@ -99,8 +99,6 @@ const virtualize = node => {
     )
     .then( rootNode => callback( null, rootNode ) )
     .catch( callback )
-
-  return { $virtualize }
 }
 
 module.exports = virtualize

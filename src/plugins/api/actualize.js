@@ -6,26 +6,25 @@ const pify = require( 'pify' )
 
 const { stat, writeFile, mkdir } = pify( fs )
 
-const actualize = node => {
+const actualize = ({ api }) => {
   const write = ( root, current ) => {
     const filename = path.join( root, current.getPath() )
 
-    if( current.nodeType() === 'directory' )
+    if( current.nodeName === '#directory' )
       return mkdir( filename )
 
-    const value = current.getValue()
-    const { data, encoding } = value
+    const { data, encoding } = current.value
 
     return writeFile( filename, data, encoding )
   }
 
-  const actualize = ( root, callback ) =>
+  api.actualize = ( root, callback ) =>
     stat( root )
     .then( stats => {
       if( !stats.isDirectory() )
         throw new Error( 'root must be a path to an existing directory' )
     })
-    .then( () => node.findAll( () => true ) )
+    .then( () => api.subNodes.toArray() )
     .then( nodes => new Promise( ( resolve, reject ) => {
       const next = () => {
         if( nodes.length === 0 )
@@ -40,8 +39,6 @@ const actualize = node => {
     }))
     .then( () => callback( null ) )
     .catch( err => callback( err ) )
-
-  return { actualize }
 }
 
 module.exports = actualize

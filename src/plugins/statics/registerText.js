@@ -1,8 +1,8 @@
 'use strict'
 
-const is = require( '@mojule/is' )
+const is = require( '../../is' )
 
-const registerText = node => {
+const registerText = ({ statics }) => {
   const extensions = new Set()
 
   const normalizeExt = ext => {
@@ -17,12 +17,8 @@ const registerText = node => {
     return ext
   }
 
-  const $registerText = ext => extensions.add( normalizeExt( ext ) )
-  const $isTextExtension = ext => extensions.has( normalizeExt( ext ) )
-
-  return {
-    $registerText, $isTextExtension
-  }
+  statics.registerText = ext => extensions.add( normalizeExt( ext ) )
+  statics.isTextExtension = ext => extensions.has( normalizeExt( ext ) )
 }
 
 module.exports = registerText

@@ -5,7 +5,7 @@ const path = require( 'path' )
 const fs = require( 'fs' )
 const pify = require( 'pify' )
 const rimraf = require( 'rimraf' )
-const Vfs = require( '../src' )
+const VFS = require( '../src' )
 const is = require( '../src/is' )
 
 const sourceDirectory = path.join( process.cwd(), 'test/fixtures/source' )
@@ -21,19 +21,19 @@ describe( 'VFS', () => {
 
   describe( 'createFile', () => {
     it( 'text', () => {
-      const text = Vfs.createFile( 'hello.txt', 'Hello, world!' )
+      const text = VFS.createFile( 'hello.txt', 'Hello, world!' )
 
-      assert.equal( text.nodeType(), 'file' )
-      assert.equal( text.data(), 'Hello, world!' )
-      assert.equal( text.mime(), 'text/plain' )
-      assert.equal( text.filename(), 'hello.txt' )
-      assert.equal( text.ext(), '.txt' )
+      assert.equal( text.nodeType, VFS.FILE_NODE )
+      assert.equal( text.data, 'Hello, world!' )
+      assert.equal( text.mime, 'text/plain' )
+      assert.equal( text.filename, 'hello.txt' )
+      assert.equal( text.ext, '.txt' )
     })
 
     it( 'from buffer', () => {
       const buffer = Buffer.from( base64png, 'base64' )
-      const png = Vfs.createFile( 'bin.png', buffer )
-      const data = png.data()
+      const png = VFS.createFile( 'bin.png', buffer )
+      const { data } = png
 
       assert( data instanceof Buffer )
     })
@@ -42,8 +42,8 @@ describe( 'VFS', () => {
       const buffer = Buffer.from( base64png, 'base64' )
       const json = JSON.stringify( buffer )
       const obj = JSON.parse( json )
-      const png = Vfs.createFile( 'bin.png', obj )
-      const data = png.data()
+      const png = VFS.createFile( 'bin.png', obj )
+      const { data } = png
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -53,8 +53,8 @@ describe( 'VFS', () => {
       const buffer = Buffer.from( base64png, 'base64' )
       const json = JSON.stringify( buffer )
       const obj = JSON.parse( json )
-      const png = Vfs.createFile( 'bin.png', obj.data )
-      const data = png.data()
+      const png = VFS.createFile( 'bin.png', obj.data )
+      const { data } = png
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -62,8 +62,8 @@ describe( 'VFS', () => {
 
     it( 'from buffer with encoding', () => {
       const buffer = Buffer.from( base64png, 'base64' )
-      const png = Vfs.createFile( 'bin.png', buffer, 'buffer' )
-      const data = png.data()
+      const png = VFS.createFile( 'bin.png', buffer, 'buffer' )
+      const { data } = png
 
       assert( data instanceof Buffer )
       assert.equal( data.toString( 'base64' ), base64png )
@@ -73,41 +73,41 @@ describe( 'VFS', () => {
       const buffer = Buffer.from( base64png, 'base64' )
       const hex = buffer.toString( 'hex' )
 
-      const png = Vfs.createFile( 'bin.png', hex, 'hex' )
-      const data = png.data()
+      const png = VFS.createFile( 'bin.png', hex, 'hex' )
+      const { data } = png
 
       assert( is.string( data ) )
       assert.equal( data, hex )
     })
 
     it( 'bad filename', () => {
-      assert.throws( () => Vfs.createFile( 'root/hello.txt', 'hello' ) )
-      assert.throws( () => Vfs.createFile( '', 'hello' ) )
-      assert.throws( () => Vfs.createDirectory( 'root/hello' ) )
-      assert.throws( () => Vfs.createDirectory( '' ) )
+      assert.throws( () => VFS.createFile( 'root/hello.txt', 'hello' ) )
+      assert.throws( () => VFS.createFile( '', 'hello' ) )
+      assert.throws( () => VFS.createDirectory( 'root/hello' ) )
+      assert.throws( () => VFS.createDirectory( '' ) )
     })
   })
 
   describe( 'serializes', () => {
     it( 'single directory', () => {
-      const root = Vfs.createDirectory( 'root' )
+      const root = VFS.createDirectory( 'root' )
       const serRoot = root.serialize()
 
       assert.deepEqual( serRoot, { 'root': true } )
     })
 
     it( 'single file', () => {
-      const file = Vfs.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
+      const file = VFS.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
       const serFile = file.serialize()
 
       assert.deepEqual( serFile, { 'hello.txt': 'Hello, World!' } )
     })
 
     it( 'nested', () => {
-      const root = Vfs.createDirectory( 'root' )
-      const file = Vfs.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
+      const root = VFS.createDirectory( 'root' )
+      const file = VFS.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
 
-      root.add( file )
+      root.appendChild( file )
 
       const serTree = root.serialize()
 
@@ -117,7 +117,7 @@ describe( 'VFS', () => {
     it( 'binary', () => {
       const expect = { 'bin.png': base64png }
       const buffer = Buffer.from( base64png, 'base64' )
-      const file = Vfs.createFile( 'bin.png', buffer )
+      const file = VFS.createFile( 'bin.png', buffer )
       const serFile = file.serialize()
 
       assert.deepEqual( serFile, expect )
@@ -127,96 +127,54 @@ describe( 'VFS', () => {
       const expect = { 'bin.png': base64png }
       const buffer = Buffer.from( base64png, 'base64' )
       const hex = buffer.toString( 'hex' )
-      const file = Vfs.createFile( 'bin.png', hex, 'hex' )
+      const file = VFS.createFile( 'bin.png', hex, 'hex' )
       const serFile = file.serialize()
 
       assert.deepEqual( serFile, expect )
     })
   })
 
+
   describe( 'deserializes', () => {
     it( 'single directory', () => {
-      const root = Vfs.createDirectory( 'root' )
+      const root = VFS.createDirectory( 'root' )
       const serRoot = root.serialize()
-      const rootTree = Vfs.deserialize( serRoot )
+      const rootTree = VFS.deserialize( serRoot )
 
-      const expect = [{ nodeType: 'directory', filename: 'root' }]
-
-      assert.deepEqual( rootTree.get(), expect )
+      assert.deepEqual( serRoot, rootTree.serialize() )
     })
 
     it( 'single file', () => {
-      const file = Vfs.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
+      const file = VFS.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
       const serFile = file.serialize()
-      const fileTree = Vfs.deserialize( serFile )
+      const fileTree = VFS.deserialize( serFile )
 
-      const expect = [
-        {
-          nodeType: 'file',
-          filename: 'hello.txt',
-          data: 'Hello, World!',
-          encoding: 'utf8',
-          ext: '.txt',
-          mime: 'text/plain'
-        }
-      ]
-
-      assert.deepEqual( fileTree.get(), expect )
+      assert.deepEqual( serFile, fileTree.serialize() )
     })
 
     it( 'nested', () => {
-      const root = Vfs.createDirectory( 'root' )
-      const sub = Vfs.createDirectory( 'sub' )
-      const sub2 = Vfs.createDirectory( 'sub2' )
-      const text = Vfs.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
-      const js = Vfs.createFile( 'hello.js', '\'use strict\'\n', 'utf8' )
+      const root = VFS.createDirectory( 'root' )
+      const sub = VFS.createDirectory( 'sub' )
+      const sub2 = VFS.createDirectory( 'sub2' )
+      const text = VFS.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
+      const js = VFS.createFile( 'hello.js', '\'use strict\'\n', 'utf8' )
 
-      root.add( text )
-      root.add( sub )
-      root.add( sub2 )
-      sub.add( js )
+      root.appendChild( text )
+      root.appendChild( sub )
+      root.appendChild( sub2 )
+      sub.appendChild( js )
 
       const serTree = root.serialize()
-      const tree = Vfs.deserialize( serTree )
+      const tree = VFS.deserialize( serTree )
 
-      const expect = [
-        { nodeType: 'directory', filename: 'root' },
-        [
-          {
-            nodeType: 'file',
-            filename: 'hello.txt',
-            data: 'Hello, World!',
-            encoding: 'utf8',
-            ext: '.txt',
-            mime: 'text/plain'
-          }
-        ],
-        [
-          { nodeType: 'directory', filename: 'sub' },
-          [
-            {
-              nodeType: 'file',
-              filename: 'hello.js',
-              data: '\'use strict\'\n',
-              encoding: 'utf8',
-              ext: '.js',
-              mime: 'application/javascript'
-            }
-          ]
-        ],
-        [
-          { nodeType: 'directory', filename: 'sub2' }
-        ]
-      ]
-
-      assert.deepEqual( tree.get(), expect )
+      assert.deepEqual( serTree, tree.serialize() )
     })
 
     it( 'binary', () => {
       const serFile = { 'bin.png': base64png }
 
-      const file = Vfs.deserialize( serFile )
-      const data = file.data()
+      const file = VFS.deserialize( serFile )
+      const { data } = file
 
       assert( data instanceof Buffer )
     })
@@ -236,8 +194,8 @@ describe( 'VFS', () => {
           throw e
       }
 
-      Vfs.registerText( '.mmon' )
-      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
+      VFS.registerText( '.mmon' )
+      VFS.virtualize( sourceDirectory, ( err, tree ) => {
         assert( !err )
 
         const ser = tree.serialize()
@@ -255,7 +213,7 @@ describe( 'VFS', () => {
     })
 
     it( 'virtualizes file', done => {
-      Vfs.virtualize( sourceHelloFile, ( err, tree ) => {
+      VFS.virtualize( sourceHelloFile, ( err, tree ) => {
         assert( !err )
 
         const ser = tree.serialize()
@@ -269,26 +227,26 @@ describe( 'VFS', () => {
     })
 
     it( 'bad registerText extensions', () => {
-      assert.throws( () => Vfs.registerText() )
-      assert.throws( () => Vfs.registerText( '' ) )
+      assert.throws( () => VFS.registerText() )
+      assert.throws( () => VFS.registerText( '' ) )
     })
 
     it( 'registerText dotless', () => {
-      Vfs.registerText( 'haml' )
-      assert( Vfs.isTextExtension( '.haml' ) )
+      VFS.registerText( 'haml' )
+      assert( VFS.isTextExtension( '.haml' ) )
     })
   })
 
   describe( 'actualize', () => {
     it( 'actualizes directory', done => {
-      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
+      VFS.virtualize( sourceDirectory, ( err, tree ) => {
         mkdir( targetDirectory )
         .then( () => {
           tree.actualize( targetDirectory, err => {
             assert( !err )
 
-            Vfs.virtualize( actualizedDirectory, ( err, actTree ) => {
-              assert.deepEqual( tree.get(), actTree.get() )
+            VFS.virtualize( actualizedDirectory, ( err, actTree ) => {
+              assert.deepEqual( tree.serialize(), actTree.serialize() )
 
               rimraf( targetDirectory, () => done() )
             })
@@ -298,14 +256,14 @@ describe( 'VFS', () => {
     })
 
     it( 'actualizes file', done => {
-      Vfs.virtualize( sourceHelloFile, ( err, tree ) => {
+      VFS.virtualize( sourceHelloFile, ( err, tree ) => {
         mkdir( targetDirectory )
         .then( () => {
           tree.actualize( targetDirectory, err => {
             assert( !err )
 
-            Vfs.virtualize( targetHelloFile, ( err, actTree ) => {
-              assert.deepEqual( tree.get(), actTree.get() )
+            VFS.virtualize( targetHelloFile, ( err, actTree ) => {
+              assert.deepEqual( tree.serialize(), actTree.serialize() )
 
               rimraf( targetDirectory, () => done() )
             })
@@ -315,7 +273,7 @@ describe( 'VFS', () => {
     })
 
     it( 'bad root path', done => {
-      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
+      VFS.virtualize( sourceDirectory, ( err, tree ) => {
         tree.actualize( '', err => {
           assert( err )
           tree.actualize( sourceHelloFile, err => {
@@ -327,39 +285,42 @@ describe( 'VFS', () => {
     })
   })
 
+
   describe( 'value', () => {
     it( 'sets new file name value', () => {
-      const text = Vfs.createFile( 'hello.txt', 'hello' )
+      const text = VFS.createFile( 'hello.txt', 'hello' )
 
-      text.setValue( 'filename', 'goodbye.txt' )
+      text.value.filename = 'goodbye.txt'
 
-      assert.equal( text.filename(), 'goodbye.txt' )
+      assert.equal( text.filename, 'goodbye.txt' )
     })
 
     it( 'sets new directory name value', () => {
-      const directory = Vfs.createDirectory( 'hello' )
+      const directory = VFS.createDirectory( 'hello' )
 
-      directory.setValue( 'filename', 'goodbye' )
+      directory.value.filename = 'goodbye'
 
-      assert.equal( directory.filename(), 'goodbye' )
+      assert.equal( directory.filename, 'goodbye' )
     })
 
     it( 'throws on bad value', () => {
-      const text = Vfs.createFile( 'hello.txt', 'hello' )
+      const text = VFS.createFile( 'hello.txt', 'hello' )
 
-      assert.throws( () => text.setValue( 'nodeType', 'directory' ) )
+      assert.throws( () => {
+        text.value = { nodeType: 0, filename: 'nope' }
+      })
     })
   })
 
   describe( 'paths', () => {
     it( 'getPath', done => {
-      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
-        const depth2 = tree.find( current =>
-          current.filename() === 'depth-2'
+      VFS.virtualize( sourceDirectory, ( err, tree ) => {
+        const depth2 = tree.subNodes.find( current =>
+          current.filename === 'depth-2'
         )
 
-        const png = tree.find( current =>
-          current.filename() === 'bin.png'
+        const png = tree.subNodes.find( current =>
+          current.filename === 'bin.png'
         )
 
         assert.equal( tree.getPath(), 'source' )
@@ -371,13 +332,13 @@ describe( 'VFS', () => {
     })
 
     it( 'atPath', done => {
-      Vfs.virtualize( sourceDirectory, ( err, tree ) => {
-        const depth2 = tree.find( current =>
-          current.filename() === 'depth-2'
+      VFS.virtualize( sourceDirectory, ( err, tree ) => {
+        const depth2 = tree.subNodes.find( current =>
+          current.filename === 'depth-2'
         )
 
-        const png = tree.find( current =>
-          current.filename() === 'bin.png'
+        const png = tree.subNodes.find( current =>
+          current.filename === 'bin.png'
         )
 
         assert.equal( tree.atPath( 'source' ), tree )
@@ -386,37 +347,6 @@ describe( 'VFS', () => {
 
         done()
       })
-    })
-  })
-
-  describe( 'Factory', () => {
-    const { Factory } = Vfs
-
-    it( 'options', () => {
-      const Tree = Factory( { exposeState: true } )
-
-      const tree = Tree.createFile( 'hello.txt', 'hello' )
-
-      assert( is.object( tree.state ) )
-    })
-
-    it( 'plugins', () => {
-      const nameWithoutExt = node => {
-        return {
-          nameWithoutExt: () => {
-            const name = node.filename()
-            const parsed = path.parse( name )
-
-            return parsed.name
-          }
-        }
-      }
-
-      const Tree = Factory( [ nameWithoutExt ] )
-
-      const tree = Tree.createFile( 'hello.txt', 'hello' )
-
-      assert.equal( tree.nameWithoutExt(), 'hello' )
     })
   })
 })
