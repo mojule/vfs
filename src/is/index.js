@@ -43,10 +43,10 @@ const isValue = subject =>
   Is.string( subject.nodeType )
 
 const isDirectoryValue = subject =>
-  isValue( subject ) && subject.nodeType === 'directory'
+  isValue( subject ) && subject.nodeType === 40 //ugh
 
 const isFileValue = subject =>
-  isValue( subject ) && subject.nodeType === 'file' &&
+  isValue( subject ) && subject.nodeType === 41 &&
   ( isStringData( subject ) || isBinaryData( subject ) )
 
 const isStringData = subject =>

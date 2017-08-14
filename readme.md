@@ -2,6 +2,9 @@
 
 Virtual file system built on mojule tree
 
+**Important:** this documentation is out of date and needs to be updated.
+However, the tests are up to date and provide examples for usage.
+
 ## Install
 
 `npm install @mojule/vfs`
@@ -18,7 +21,7 @@ console.log( tree.serialize() )
 const virtualFile = Vfs.createFile( 'hello.txt', 'Hello, World!', 'utf8' )
 const virtualDirectory = Vfs.createDirectory( 'text' )
 
-virtualDirectory.append( virtualFile )
+virtualDirectory.appendChild( virtualFile )
 virtualDirectory.actualize( 'some/path' )
 ```
 

@@ -1,18 +1,7 @@
 'use strict'
 
-const actualize = require( './actualize' )
-const atPath = require( './atPath' )
-const create = require( './create' )
-const getPath = require( './getPath' )
-const isEmpty = require( './isEmpty' )
-const isValue = require( './isValue' )
-const registerText = require( './registerText' )
-const serializer = require( './serializer' )
-const slug = require( './slug' )
-const value = require( './value' )
-const virtualize = require( './virtualize' )
+const api = require( './api' )
+const core = require( './core' )
+const statics = require( './statics' )
 
-module.exports = [
-  actualize, atPath, create, getPath, isEmpty, isValue, registerText,
-  serializer, slug, value, virtualize
-]
+module.exports = { api, core, statics }
