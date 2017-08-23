@@ -6,7 +6,7 @@ const fs = require( 'fs' )
 const pify = require( 'pify' )
 const rimraf = require( 'rimraf' )
 const VFS = require( '../src' )
-const is = require( '../src/is' )
+const is = require( '@mojule/vfs-core/src/is' )
 
 const sourceDirectory = path.join( process.cwd(), 'test/fixtures/source' )
 const sourceHelloFile = path.join( process.cwd(), 'test/fixtures/source/hello.txt' )

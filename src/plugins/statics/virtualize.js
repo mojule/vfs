@@ -4,7 +4,7 @@ const fs = require( 'fs' )
 const path = require( 'path' )
 const Mime = require( 'mime' )
 const pify = require( 'pify' )
-const is = require( '../../is' )
+const is = require( '@mojule/vfs-core/src/is' )
 
 const { stat, readdir, readFile } = pify( fs )
 

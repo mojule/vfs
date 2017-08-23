@@ -1,6 +1,6 @@
 'use strict'
 
-const { Factory } = require( '@mojule/tree' )
+const { Factory } = require( '@mojule/vfs-core' )
 const plugins = require( './plugins' )
 
 const VFS = Factory( plugins )
